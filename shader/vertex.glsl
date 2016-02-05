@@ -11,8 +11,9 @@ out vec4 out_color;
 //==================================================
 // Todo : Recuperer les matrices de transformation
 //==================================================
-
-
+uniform mat4 ModelMatrix;	// matrice du modele
+uniform mat4 ViewMatrix;	// matrice de vue
+uniform mat4 ProjectionMatrix;	// matrice de projection
 
 // Fonction appellee pour chaque sommet
 void main()
@@ -24,6 +25,9 @@ void main()
   // Todo : Effectuer la transformation MVP
   //==================================================
   gl_Position = vec4(in_position, 1.0);
+  
+  // Transformation MVC 
+  gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(in_position, 1.0);
 
   // creation de la couleur du sommet
   out_color = vec4((in_position + vec3(1))*0.5, 1.0);

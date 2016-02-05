@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <sstream>
 
 #include <shader.h> // Help to load shaders from files
 
@@ -21,6 +22,72 @@
 
 using namespace glm;
 using namespace std;
+
+void view_control(mat4 *view_matrix, double *v, vec3 axis){
+    if(glfwGetKey(GLFW_KEY_DOWN) == GLFW_PRESS){
+        *view_matrix = translate(*view_matrix, vec3(0.0, 0.01, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_UP) == GLFW_PRESS){
+        *view_matrix = translate(*view_matrix, vec3(0.0, -0.01, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_LEFT) == GLFW_PRESS){
+        *view_matrix = translate(*view_matrix, vec3(0.01, 0.0, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_RIGHT) == GLFW_PRESS){
+        *view_matrix = translate(*view_matrix, vec3(-0.01, 0.0, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_L) == GLFW_PRESS){
+        *view_matrix = scale(*view_matrix, vec3(0.9, 0.9, 0.9));
+    } else if(glfwGetKey(GLFW_KEY_M) == GLFW_PRESS){
+        *view_matrix = scale(*view_matrix, vec3(1.1, 1.1, 1.1));
+    } else if(glfwGetKey(GLFW_KEY_R) == GLFW_PRESS){
+        *view_matrix = rotate(*view_matrix, 0.5f, axis);
+    } else if(glfwGetKey(GLFW_KEY_A) == GLFW_PRESS){
+        (*v)++;
+    } else if(glfwGetKey(GLFW_KEY_Z) == GLFW_PRESS){
+        (*v)--;
+    }
+}
+
+void model_control(mat4 *model_matrix, double *v, vec3 axis){
+    if(glfwGetKey(GLFW_KEY_UP) == GLFW_PRESS){
+        *model_matrix = translate(*model_matrix, vec3(0.0, 0.01, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_DOWN) == GLFW_PRESS){
+        *model_matrix = translate(*model_matrix, vec3(0.0, -0.01, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_RIGHT) == GLFW_PRESS){
+        *model_matrix = translate(*model_matrix, vec3(0.01, 0.0, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_LEFT) == GLFW_PRESS){
+        *model_matrix = translate(*model_matrix, vec3(-0.01, 0.0, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_L) == GLFW_PRESS){
+        *model_matrix = scale(*model_matrix, vec3(0.9, 0.9, 0.9));
+    } else if(glfwGetKey(GLFW_KEY_M) == GLFW_PRESS){
+        *model_matrix = scale(*model_matrix, vec3(1.1, 1.1, 1.1));
+    } else if(glfwGetKey(GLFW_KEY_R) == GLFW_PRESS){
+        *model_matrix = rotate(*model_matrix, 0.5f, axis);
+    } else if(glfwGetKey(GLFW_KEY_A) == GLFW_PRESS){
+        (*v)++;
+    } else if(glfwGetKey(GLFW_KEY_Z) == GLFW_PRESS){
+        (*v)--;
+    }
+}
+
+void projection_control(mat4 *projection_matrix, double *v, vec3 axis){
+    if(glfwGetKey(GLFW_KEY_UP) == GLFW_PRESS){
+        *projection_matrix = translate(*projection_matrix, vec3(0.0, 0.01, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_DOWN) == GLFW_PRESS){
+        *projection_matrix = translate(*projection_matrix, vec3(0.0, -0.01, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_RIGHT) == GLFW_PRESS){
+        *projection_matrix = translate(*projection_matrix, vec3(0.01, 0.0, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_LEFT) == GLFW_PRESS){
+        *projection_matrix = translate(*projection_matrix, vec3(-0.01, 0.0, 0.0));
+    } else if(glfwGetKey(GLFW_KEY_L) == GLFW_PRESS){
+        *projection_matrix = scale(*projection_matrix, vec3(0.9, 0.9, 0.9));
+    } else if(glfwGetKey(GLFW_KEY_M) == GLFW_PRESS){
+        *projection_matrix = scale(*projection_matrix, vec3(1.1, 1.1, 1.1));
+    } else if(glfwGetKey(GLFW_KEY_R) == GLFW_PRESS){
+        *projection_matrix = rotate(*projection_matrix, 0.5f, axis);
+    } else if(glfwGetKey(GLFW_KEY_A) == GLFW_PRESS){
+        (*v)++;
+    } else if(glfwGetKey(GLFW_KEY_Z) == GLFW_PRESS){
+        (*v)--;
+    }
+}
 
 
 int main()
@@ -116,26 +183,90 @@ int main()
     // ToDo : Creer les matrices de transformation
     //==================================================
 
+	// Creation des matrices
+	mat4 model_matrix = mat4(1.0);
+	mat4 view_matrix = lookAt(vec3(0.0, 0.0, 2.0),			// position
+							  vec3(0.0),					// orientation
+							  vec3(0.0, 1.0, 0.0));			// direction verticale
+	mat4 projection_matrix = perspective(45.0f,				// angle de vue
+										 WIDTH / HEIGHT,	// ratio de la fenetre
+										 0.1f,				// limite de proximite
+										 100.0f);			// limite d'eloignement
+	
+	// Changement de point de vue									 
+    vec3 axis = vec3(0.0, 1.0, 0.0);
+    vec3 axisX = vec3(1.0, 1.0, 1.0);
+	// view_matrix = rotate(view_matrix, 45.0f, axis);
+	// view_matrix = scale(view_matrix, vec3(0.5, 0.5, 0.5));
+	// view_matrix = translate(view_matrix, vec3(0.5, 0.0, 0.0));
 
-
-
-
-
+	// Recuperation des ID des matrices dans le shader program
+	GLuint MmatrixID = glGetUniformLocation(programID, "ModelMatrix");
+	GLuint VmatrixID = glGetUniformLocation(programID, "ViewMatrix");
+	GLuint PmatrixID = glGetUniformLocation(programID, "ProjectionMatrix");
 
     cout << "Debut de la boucle principale..." << endl;
     // Boucle de dessin
     unsigned int i = 0;
+    double time1 = glfwGetTime();
+    double time2;
+    double dt;
+    float dx;
+    double v = 1;
+    float fps;
+    int cptFrame = 0;
+    bool modeView = true;
+    bool modeModel = false;
+    bool modeProjection = false;
 	do{
         // Nettoyage de la zone de dessin
 		glClear( GL_COLOR_BUFFER_BIT );
+
+        time2 = glfwGetTime();
+        dt = time2-time1;
+        dx = v*dt;
+        time1 = time2;
+        if(cptFrame == 10){
+            cptFrame = 0;
+            fps = ((int)100.0/dt)/100.0;
+            ostringstream os;
+            os << fps;
+            string fpsMessage = "Polytech RICM 4 - TP2 -- FR:" + os.str() + " FPS";
+
+            glfwSetWindowTitle(fpsMessage.c_str());
+        } else{
+            cptFrame++;
+        }
 
         //==================================================
         // ToDo : Modifier les matrices de transformation
         //==================================================
 
+        // Animation de la caméra - rotation autour de l'axe y 
 
+        if(glfwGetKey(GLFW_KEY_F1) == GLFW_PRESS){
+            modeView = true;
+            modeModel = false;
+            modeProjection = false;
+        } else if(glfwGetKey(GLFW_KEY_F2) == GLFW_PRESS){
+            modeModel = true;
+            modeView = false;
+            modeProjection = false;
+        } else if(glfwGetKey(GLFW_KEY_F3) == GLFW_PRESS){
+            modeProjection = true;
+            modeView = false;
+            modeModel = false;
+        }
 
+        if(modeView){
+            view_control(&view_matrix, &v, axis);
+        } else if(modeModel) {
+            model_control(&model_matrix, &v, axis);
+        } else if(modeProjection){
+            projection_control(&projection_matrix, &v, axis);
+        }
 
+        view_matrix = rotate(view_matrix, dx, axisX);
 
         //==================================================
         //===================== Dessin =====================
@@ -149,8 +280,9 @@ int main()
         //==================================================
         // ToDo : Transmettre les matrices au vertex shader
         //==================================================
-
-
+		glUniformMatrix4fv(MmatrixID, 1, GL_FALSE, value_ptr(model_matrix));
+		glUniformMatrix4fv(VmatrixID, 1, GL_FALSE, value_ptr(view_matrix));
+		glUniformMatrix4fv(PmatrixID, 1, GL_FALSE, value_ptr(projection_matrix));
 
 
         // Activation de l'attribut vertexPositionID
